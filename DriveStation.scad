@@ -1,134 +1,106 @@
-boardWidth = 60;
-boardLength = 14;
-joyWidth = 8.8;
-joyLength = 8.4;
-laptopWidth = 12.75;
-laptopLength = 9;
-sliderWidth = 0.5;
-sliderLength = 3.5;
-buttonDiameter = 0.69;
-rockerWidth = 0.55;
-rockerLength = 0.98;
+$fn=100;
 
-module board() {
-    color("BurlyWood")
-    cube([boardWidth, boardLength, 2]);
+showFrames = false;
+
+module button() {
+    circle(r=1.125/2);
 }
-module slider(location, vertical) {
-    if (vertical) {
-        translate([location[0], location[1], 2]) {
-            color("DimGray")
-            cube([sliderWidth, sliderLength, 0.4]);
-        }
-        translate([location[0] + sliderWidth/2, location[1] + sliderLength/2, 2.4]) {
-            color("Silver")
-            cube([0.1, 0.4, 0.2]);
-        }
-    } else {
-        translate([location[0], location[1], 2]) {
-            color("DimGray")
-            cube([sliderLength, sliderWidth, 0.4]);
-        }
-        translate([location[0] + sliderLength/2, location[1] + sliderWidth/2, 2.4]) {
-            color("Silver")
-            cube([0.4, 0.1, 0.2]);
-        }
-    }
+
+module rocker() {
+    circle(r=0.25);
+    if (showFrames) square([0.5,1],center=true);
 }
-module button(color, location, big) {
-    if (big) {
-        translate([location[0], location[1], 2]) {
-            color(color)
-            cylinder(0.3, buttonDiameter, buttonDiameter, $fn = 100);
-        }
-        translate([location[0], location[1], 2.3]) {
-            color(color)
-            cylinder(0.15, buttonDiameter*2/3, buttonDiameter*2/3, $fn = 100);
-        }
-    } else {
-        translate([location[0], location[1], 2]) {
-            color(color)
-            scale(0.3, 0.3, 0.3)
-            cylinder(0.3, buttonDiameter, buttonDiameter, $fn = 100);
-        }
-        translate([location[0], location[1], 2.09]) {
-            color(color)
-            scale(0.3, 0.3, 0.3)
-            cylinder(0.15, buttonDiameter*2/3, buttonDiameter*2/3, $fn = 100);
-        }
-    }
+
+module miniButton() {
+    circle(r=0.125);
 }
-module rocker(location) {
-    translate([location[0], location[1], 2]) {
-        color("Silver")
-        cube([rockerWidth, rockerLength, 0.20]);
-    }
-    translate([location[0] + rockerWidth/2, location[1] + rockerLength/2, 2.20]) {
-        color("Silver")
-        rotate([-12, 0, 0])
-        cylinder(0.53, 0.12, 0.2, $fn = 100);
-    }
+
+module slider() {
+    boltRad = 0.0629921;
+    boltSpace = 3.14961;
+    
+    translate([0,boltSpace/2]) circle(r=boltRad);
+    translate([0,-boltSpace/2]) circle(r=boltRad);
+    
+    square([0.0551181,2.67717],center=true);
+    
+    //square([0.25,3.46457],center=true);
 }
-module joystick(location) {
-    translate([location[0], location[1], 2]) {
-        color("Silver")
-        cube([joyWidth, joyLength, 0.2]);
-    }
-    translate([location[0] + joyWidth/2, location[1] + joyLength/2, 2.2]) {
-        color("Black")
-        rotate([-10, 0, 0]) {
-            translate([0, 0, 0.4]) {
-                sphere(2, $fn = 100);
-            }
-            cylinder(9, 1, 0.5, $fn = 100);
-        }
-    }
+
+module lifter() {
+    rotate(90) slider();
+    translate([-1,1.25]) button();
+    translate([1,1.25]) button();
 }
-module laptop(location) {
-    translate([location[0], location[1], 2]) {
-        color("Silver") {
-            cube([laptopWidth, laptopLength, 0.5]);
-            translate([0, 9, 0])
-            rotate([85, 0, 0])
-            cube([laptopWidth, laptopLength, 0.5]);
-        }
+
+module gearMech() {
+    rowSpacing = 1.5;
+    for (i=[-3:2:3]) translate([i,0]) button();
+        
+    for (i=[-1:2:1]) {
+        translate([i*3,-rowSpacing]) button();
+        translate([i*1.5,-rowSpacing]) button();
     }
 }
 
-board();
+module robot() {
+    rotate(90) lifter();
+    translate([-5/8,0]) miniButton();
+}
 
-joystick([0, 0]);
-joystick([joyWidth + 0.5, 0]);
+module shooter() {
+    rSpacing = 2;
+    cSpacing = 2;
+    
+    for (r=[-rSpacing/2:rSpacing:rSpacing/2]) for (c=[-cSpacing/2:cSpacing:cSpacing/2]) translate([r,c]) button();
+    
+    translate([2.25,0]) slider();
+    translate([0,-2.25]) rotate(90) slider();
+    
+    translate([0,0]) rocker();
+}
 
-laptop([boardWidth/2 - laptopWidth/2, boardLength - laptopLength]);
+module lcd() {
+    square([4.72441,3.07087],center=true);
+}
 
-rocker([2*joyWidth + 2, joyLength/2]);
+module layout() {
+    translate([2.25,1]) lifter();
+    translate([4.25,7.75]) gearMech();
+    translate([12.25,2.75]) robot();
+    translate([6.75,3.25]) shooter();
+    translate([11,6.75]) lcd();
+}
 
-slider([boardWidth/2 - sliderLength/2, 1], false);
 
-button("Red", [boardWidth/2 - sliderLength/2 - 1, 1.3], false);
-button("Red", [boardWidth/2 + laptopWidth/2 + 3, boardLength/2], true);
-button("Red", [boardWidth/2 + laptopWidth/2 + 3, 5], true);
 
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 6, boardLength/2], true);
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 6, 5], true);
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 6, 5 - (boardLength/2 - 5)], true);
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 6, boardLength/2 + (boardLength/2 - 5)], true);
+module frame() {
+    dimX = 14;
+    dimY = 9;
+    
+    filletRad = 0.375;
+    
+    boltRad = 0.196/2;
+    
+    skirt = 3/8;
+    
+    difference() {
+        hull() {
+            translate([filletRad,filletRad]) circle(r=filletRad);
+            translate([dimX-filletRad,filletRad]) circle(r=filletRad);
+            translate([dimX-filletRad,dimY-filletRad]) circle(r=filletRad);
+            translate([filletRad,dimY-filletRad]) circle(r=filletRad);
+        }
+        
+        
+        for (i=[skirt:(dimX-2*skirt)/2:dimX-skirt]) for (j=[skirt:dimY-2*skirt:dimY-skirt]) translate([i,j]) circle(r=boltRad);
+                
+        
+    }
 
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 9, 5], true);
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 9, boardLength/2], true);
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 11, 5], true);
-button("Yellow", [boardWidth/2 + laptopWidth/2 + 11, boardLength/2], true);
+}
 
-button("Blue", [boardWidth/2 + laptopWidth/2 + 14, 5], true);
-button("Blue", [boardWidth/2 + laptopWidth/2 + 14, boardLength/2], true);
-slider([boardWidth/2 + laptopWidth/2 + 14 - sliderWidth/2, 0], true);
-
-button("Green", [boardWidth/2 + laptopWidth/2 + 17, 5], true);
-button("Green", [boardWidth/2 + laptopWidth/2 + 17, boardLength/2], true);
-slider([boardWidth/2 + laptopWidth/2 + 17 - sliderWidth/2, 0], true);
-
-button("Green", [boardWidth/2 + laptopWidth/2 + 20, 5], true);
-button("Green", [boardWidth/2 + laptopWidth/2 + 20, boardLength/2], true);
-slider([boardWidth/2 + laptopWidth/2 + 20 - sliderWidth/2, 0], true);
-rocker([boardWidth/2 + laptopWidth/2 + 22, sliderLength/2]);
+difference() {
+    frame();
+    layout();
+}
