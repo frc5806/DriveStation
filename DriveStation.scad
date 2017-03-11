@@ -100,7 +100,38 @@ module frame() {
 
 }
 
-difference() {
-    frame();
-    layout();
+module 2d() {
+    difference() {
+        frame();
+        layout();
+    }
 }
+
+module knob() {
+    difference() {
+        hull() {
+            cube([1,0.5,0.25]);
+            
+            filletRad = 0.125/2;
+
+            translate([filletRad,0,0.5-filletRad]) rotate([-90,0,0]) cylinder(r=filletRad,h=0.5);
+            translate([1-filletRad,0,0.5-filletRad]) rotate([-90,0,0]) cylinder(r=filletRad,h=0.5);
+        }
+        
+        translate([0.5,-1,1.41]) rotate([-90,0,0]) cylinder(r=1,h=2);
+        
+        for (i=[-30:2.5:30]) {
+            translate([0.5,-0.25,1.41]) rotate([0,i,0]) translate([0,0,-0.99]) rotate([-90,0,0]) cylinder(r=1/64,h=1);   
+        }
+
+        translate([0.5,0.25,0]) {
+            height = 0.4;
+
+            translate([-0.15748,-0.023622,0]) cube([0.137795,0.0472441,height]);
+            translate([0.019685,-0.023622,0]) cube([0.137795,0.0472441,height]);
+        }
+
+    }
+}
+
+2d();
